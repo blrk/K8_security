@@ -15,7 +15,7 @@
   ca.key
   ```
 
-  * Create CSR
+* Create CSR
   ``` bash
   openssl req -new -key ca.key -subj "/CN=K8s-CA" -out ca.csr ```
 
