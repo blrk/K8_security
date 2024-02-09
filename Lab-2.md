@@ -26,6 +26,18 @@
   -rw-r--r--. 1 root root 1582 Feb  9 15:44 ca.csr
   -rw-------. 1 root root 3272 Feb  9 15:40 ca.key
   ```
+* Self-sign the CSR
+
+``` bash
+openssl x509 -req -in ca.csr -signkey ca.key -CAcreateserial  -out ca.crt -days 500
+
+Certificate request self-signature ok
+subject=CN = K8s-CA
+```
+
+
+
+
 
   
 
