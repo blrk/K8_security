@@ -38,6 +38,5 @@ subject=CN = K8s-CA
 
 
 
-
   
 
