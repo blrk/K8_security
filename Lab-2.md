@@ -9,5 +9,4 @@
   ```
   ``` bash
   [root@k8security k8-certificates]# ls
-ca.key
-```
+  ca.key ```
