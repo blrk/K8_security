@@ -17,7 +17,8 @@
 
 * Create CSR
   ``` bash
-  openssl req -new -key ca.key -subj "/CN=K8s-CA" -out ca.csr ```
+  openssl req -new -key ca.key -subj "/CN=K8s-CA" -out ca.csr
+  ```
 
   ```bash
   [root@k8security k8-certificates]# ll
