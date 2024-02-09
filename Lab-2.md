@@ -3,7 +3,7 @@
   ``` bash
   mkdir /root/k8-certificates
   cd /root/k8-certificates/ ```
-
+* Create key
   ``` bash
   openssl genrsa -out ca.key 4098
   ```
