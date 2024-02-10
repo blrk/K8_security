@@ -39,6 +39,11 @@ tar -xzvf kubernetes-server-linux-amd64.tar.gz
 ```
 * Navigate into the binaries directory
 ``` bash
-
+cd /root/packages/kubernetes/server/bin
 ```
+* copy the binaries into /usr/local/bin/
+``` bash
+cp apiextensions-apiserver /usr/local/bin/
+```
+
 
