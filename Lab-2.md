@@ -34,7 +34,7 @@ openssl x509 -req -in ca.csr -signkey ca.key -CAcreateserial  -out ca.crt -days 
 Certificate request self-signature ok
 subject=CN = K8s-CA
 ```
-### I-Transit encryption etcd
+### In Transit encryption etcd
 * Install net-tools and tcp dump
 ``` bash
 yum install net-tools tcpdump -y
@@ -44,10 +44,6 @@ yum install net-tools tcpdump -y
 etcd
 ```
 * In terminal 2: Fetch the tcp dump from port 2379
-``` bash
-tcpdump -i lo -X  port 2379
-```
-* In terminal 3: Run etcdctl commands to store and read a value
 ``` bash
 etcdctl put axess "k8-lab"
 etcdctl get axess
