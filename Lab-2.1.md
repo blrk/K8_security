@@ -219,6 +219,15 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 ```
+* Start the etcd server and verify the status
+``` bash
+systemctl start etcd
+systemctl status etcd
+```
+* How to check the logs of etcd service
+``` bash
+journalctl -u etcd
+```
 
 
 
