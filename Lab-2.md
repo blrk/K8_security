@@ -161,6 +161,8 @@ etcd --cert-file=/root/k8-certificates/etcd.crt --key-file=/root/k8-certificates
 * Observe the logs of the servr to understand why it is failing
 * In Terminal 2 : start the tcpdump command
 ``` bash
+tcpdump -i lo -X  port 2379
+```
 * Adding data to etcd, Note: use the option --insecure-transport=false because we are using a self signed certificate
 ``` bash
 ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false put axess "k8-lab"
