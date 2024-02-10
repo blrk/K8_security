@@ -168,5 +168,25 @@ tcpdump -i lo -X  port 2379
 ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false put axess "k8-lab"
 ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false get axess
 ```
+### Implementing client authentication for etcd server
+* navigate to the certificates folder
+``` bash
+cd /root/k8-certificates
+```
+* Generate client certificate and key
+``` bash
+openssl genrsa -out client.key 4098
+openssl req -new -key client.key -subj "/CN=client" -out client.csr
+openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -extensions v3_req  -days 500
+```
+* Start the etcd server with client authentication
+``` bash
+etcd --cert-file=/root/k8-certificates/etcd.crt --key-file=/root/k8-certificates/etcd.key --advertise-client-urls=https://127.0.0.1:2379 --client-cert-auth --trusted-ca-file=/root/k8-certificates/ca.crt  --listen-client-urls=https://127.0.0.1:2379
+```
+* Add data to the etcd server using client certificate
+``` bash
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false --cert /root/k8-certificates/client.crt --key /root/k8-certificates/client.key put axess "k8-lab"
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false --cert /root/k8-certificates/client.crt --key /root/k8-certificates/client.key get axess 
+```
   
 
