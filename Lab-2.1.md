@@ -188,5 +188,37 @@ etcd --cert-file=/root/k8-certificates/etcd.crt --key-file=/root/k8-certificates
 ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false --cert /root/k8-certificates/client.crt --key /root/k8-certificates/client.key put axess "k8-lab"
 ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false --cert /root/k8-certificates/client.crt --key /root/k8-certificates/client.key get axess 
 ```
-  
+### Run the etcd server in the background using systemd
+* Create a directory for storing etcd data
+``` bash
+mkdir /var/lib/etcd
+chmod 700 /var/lib/etcd
+```
+* Create a configuration for systemd
+```  bash
+vi /etc/systemd/system/etcd.service
+```
+* Add the following configuration
+``` bash
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/usr/local/bin/etcd 
+  --cert-file=/root/k8-certificates/etcd.crt 
+  --key-file=/root/k8-certificates/etcd.key 
+  --trusted-ca-file=/root/k8-certificates/ca.crt
+  --client-cert-auth 
+  --listen-client-urls https://127.0.0.1:2379
+  --advertise-client-urls https://127.0.0.1:2379
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
 
