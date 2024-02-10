@@ -28,5 +28,17 @@ cd etcd-v3.5.4-linux-amd64
 ``` bash
 cp etcd etcdctl /usr/local/bin/
 ```
+### Install api server
+* Downlaod the package
+``` bash
+wget https://dl.k8s.io/v1.24.2/kubernetes-server-linux-amd64.tar.gz
+```
+* Extract the binaries using tar command
+``` bash
+tar -xzvf kubernetes-server-linux-amd64.tar.gz
+```
+* Navigate into the binaries directory
+``` bash
 
+```
 
