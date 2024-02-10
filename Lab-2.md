@@ -44,7 +44,7 @@ etcd
 etcdctl put axess "k8-lab"
 etcdctl get axess
 ```
-### Securing communication to etcd server
+### Listening to the etcd server communication
 * Install net-tools and tcp dump
 ``` bash
 yum install net-tools tcpdump -y
@@ -92,8 +92,79 @@ etcdctl get axess
 	0x0020:  8011 0200 fe28 0000 0101 080a d585 c2e5  .....(..........
 	0x0030:  d585 c2e2                                ....
 ```
-  
+* Go to the terminal 1 and press ctrl + c to stop the etcd server
+### Securing the communication to the etcd server
+* In terminal 1, go to the certificates directory
+``` bash
+cd /root/k8-certificates/
+openssl genrsa -out etcd.key 4098
+```
+``` bash
+[root@k8security k8-certificates]# ll
+total 16
+-rw-r--r--. 1 root root 1679 Feb  9 15:53 ca.crt
+-rw-r--r--. 1 root root 1582 Feb  9 15:44 ca.csr
+-rw-------. 1 root root 3272 Feb  9 15:40 ca.key
+drwx------. 3 root root   20 Feb  9 16:05 default.etcd
+-rw-------. 1 root root 3272 Feb 10 17:43 etcd.key
+```
+* Find the ip address of your network interface
+``` bash
+ip a s
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:de:5d:a1 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.237/24 brd 192.168.122.255 scope global dynamic noprefixroute enp1s0
+       valid_lft 2999sec preferred_lft 2999sec
+    inet6 fe80::5054:ff:fede:5da1/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+```
+* Creating Configuration for ETCD
+``` bash
+vi etcd.cnf
+```
+* Add the following configuration to the etcd.cnf
+``` bash
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+[alt_names]
+IP.1 = <Add your ensp1s0 IP here>
+IP.2 = 127.0.0.1
+```
+* Generate a certificate signing request
+``` bash
+openssl req -new -key etcd.key -subj "/CN=etcd" -out etcd.csr -config etcd.cnf
+```
+* Signing csr file with Certificate Authority Certificate
+``` bash
+openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd.crt -extensions v3_req -extfile etcd.cnf -days 500
 
-
+Certificate request self-signature ok
+subject=CN = etcd
+```
+* Start the etcd server using the certificate
+``` bash
+etcd --cert-file=/root/k8-certificates/etcd.crt --key-file=/root/k8-certificates/etcd.key --advertise-client-urls=https://127.0.0.1:2379 --listen-client-urls=https://127.0.0.1:2379
+```
+* Try to add some data to etcd server using the put command you can notice that it will fail
+* Observe the logs of the servr to understand why it is failing
+* In Terminal 2 : start the tcpdump command
+``` bash
+* Adding data to etcd, Note: use the option --insecure-transport=false because we are using a self signed certificate
+``` bash
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false put axess "k8-lab"
+ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --insecure-skip-tls-verify  --insecure-transport=false get axess
+```
   
 
