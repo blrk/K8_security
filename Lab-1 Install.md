@@ -43,7 +43,8 @@ cd /root/packages/kubernetes/server/bin
 ```
 * copy the binaries into /usr/local/bin/
 ``` bash
-cp apiextensions-apiserver /usr/local/bin/
+cp kube-apiserver kubectl /usr/local/bin/
 ```
+
 
 

@@ -200,24 +200,26 @@ vi /etc/systemd/system/etcd.service
 ```
 * Add the following configuration
 ``` bash
+cat <<EOF | tee /etc/systemd/system/etcd.service
 [Unit]
 Description=etcd
 Documentation=https://github.com/coreos
 
 [Service]
-ExecStart=/usr/local/bin/etcd 
-  --cert-file=/root/k8-certificates/etcd.crt 
-  --key-file=/root/k8-certificates/etcd.key 
-  --trusted-ca-file=/root/k8-certificates/ca.crt
-  --client-cert-auth 
-  --listen-client-urls https://127.0.0.1:2379
-  --advertise-client-urls https://127.0.0.1:2379
+ExecStart=/usr/local/bin/etcd \\
+  --cert-file=/root/k8-certificates/etcd.crt \\
+  --key-file=/root/k8-certificates/etcd.key \\
+  --trusted-ca-file=/root/k8-certificates/ca.crt \\
+  --client-cert-auth \\
+  --listen-client-urls https://127.0.0.1:2379 \\
+  --advertise-client-urls https://127.0.0.1:2379 \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 * Start the etcd server and verify the status
 ``` bash
