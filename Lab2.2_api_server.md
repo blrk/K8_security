@@ -86,3 +86,60 @@ ExecStart=/usr/local/bin/kube-apiserver \
 WantedBy=multi-user.target
 EOF
 ```
+### Enable in-transit encryption for API-server 
+* Verify client certificate details
+``` bash
+openssl s_client -showcerts -connect localhost:6443 2>/dev/null | openssl x509 -inform pem -noout -text
+```
+* Navigate to the certificates directory 
+``` bash
+cd /root/k8-certificates/
+```
+* Create config file for certificate creation
+``` bash
+cat <<EOF | sudo tee api.conf
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+IP.1 = 127.0.0.1
+IP.2 = 192.168.122.108
+IP.3 = 10.0.0.1
+EOF
+```
+* Create Certificates for API Server
+``` bash
+root@k8-security:~/k8-certificates# openssl genrsa -out kube-api.key 4098
+root@k8-security:~/k8-certificates# openssl req -new -key kube-api.key -subj "/CN=kube-apiserver" -out kube-api.csr -config api.conf
+root@k8-security:~/k8-certificates# openssl x509 -req -in kube-api.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out kube-api.crt -extensions v3_req -extfile api.conf -days 500
+```
+* Add the following glages in the kube-apiserver service fikle and restart the service
+``` bash
+vi /etc/systemd/system/kube-apiserver.service
+```
+``` bash
+--tls-cert-file=/root/k8-certificates/kube-api.crt 
+--tls-private-key-file=/root/k8-certificates/kube-api.key 
+```
+* Restart the kube-apiserver 
+``` bash
+systemctl daemon-reload
+systemctl restart kube-apiserver
+systemctl status kube-apiserver
+```
+* Verify the Certificate details
+``` bash
+openssl s_client -showcerts -connect localhost:6443 2>/dev/null | openssl x509 -inform pem -noout -text
+```
+``` bash
+curl -k https://localhost:6443
+```
