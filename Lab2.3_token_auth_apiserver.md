@@ -66,3 +66,12 @@ kubectl get secret --server=https://localhost:6443 --token Myp@ssw0rd# --insecur
 kubectl create secret generic my-secret --server=https://localhost:6443 --token Myp@ssw0rd# --insecure-skip-tls-verify
 kubectl delete secret my-secret --server=https://localhost:6443 --token Myp@ssw0rd# --insecure-skip-tls-verify
 ```
+#### Evaluate the disadvanatge of token based authentication
+* add a new user token into the csv file 
+* delete the user sam 
+* delete the user entry sam 
+* Try to create a secret using the token of user sam
+* restart the kube-apiserver
+* try to create a secret using the token of user sam
+* Open the api-server service file and remove the "--token-auth-file" entry
+* Restart the service
