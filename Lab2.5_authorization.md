@@ -38,6 +38,7 @@ systemctl restart kube-apiserver
 systemctl status kube-apiserver
 ```
 * Try to access a secret resource from the cluster
+``` bash 
 kubectl get secret --server=https://127.0.0.1:6443 --client-certificate /root/k8-certificates/sam.crt --certificate-authority /root/k8-certificates/ca.crt --client-key /root/k8-certificates/sam.key
 ```
 ``` bash
