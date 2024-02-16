@@ -170,6 +170,9 @@ kubectl run demo-pod --image=nginx
 ```
 * Cehck the status of the pods
 ``` bash
-kubectl get pods
+root@kubeadm:~# kubectl get pods
+NAME         READY   STATUS    RESTARTS   AGE
+nginx-pod    1/1     Running   0          38m
+nginx-pod1   1/1     Running   0          37m
 ```
 
