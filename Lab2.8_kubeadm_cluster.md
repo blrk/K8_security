@@ -1,11 +1,15 @@
 ### Install kubeadm cluster
 #### Install containerd
 * Add containerd network configuration
-``` bash
+``` sh
 cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
 br_netfilter
 EOF
+```
+``` sh
+modprobe overlay
+modprobe br_netfilter
 ```
 * Enable ip forward settings 
 ``` bash
@@ -21,7 +25,7 @@ sysctl --system
 ```
 * Install containerd
 ``` bash
-apt install -y containerd
+apt-get install -y containerd
 ```
 * Create a directory to store the containerd configuration
 ``` bash
@@ -38,6 +42,7 @@ vi /etc/containerd/config.toml
 * restart the containerd service
 ``` bash
 systemctl restart containerd
+systemctl status containerd
 ```
 * Add the following kernal parameterer configuration
 ``` bash
@@ -57,20 +62,61 @@ swapoff -a
 ```
 * Configure the repo
 ``` bash
-apt update
-apt install -y apt-transport-https ca-certificates curl
+apt-get update
+apt-get install -y apt-transport-https ca-certificates curl
 curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
-apt update
+apt-get update
 apt-cache madison kubeadm
-apt install -y kubelet=1.24.2-00 kubeadm=1.24.2-00 kubectl=1.24.2-00 cri-tools=1.24.2-00
+apt-get install -y kubelet=1.24.2-00 kubeadm=1.24.2-00 kubectl=1.24.2-00 cri-tools=1.24.2-00
 apt-mark hold kubelet kubeadm kubectl
 ```
 * Initialize cluster with kubeadm (master node only)
 ``` bash
 kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.2
 ```
+* copy the kube config
+``` bash
+mkdir -p $HOME/.kub
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+```
+* install a network addon flannal on (master node)
+``` bash
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+```
+* List the manifest files
+``` bash
+ls -l /etc/kubernetes/manifests
+```
+* Verify the k8s components status
+``` bash
+root@kubeadm:~# netstat -ntlp
+```
+``` bash
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      706/sshd: /usr/sbin 
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      641/systemd-resolve 
+tcp        0      0 127.0.0.1:2381          0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 127.0.0.1:2379          0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 127.0.0.1:10259         0.0.0.0:*               LISTEN      4211/kube-scheduler 
+tcp        0      0 127.0.0.1:10257         0.0.0.0:*               LISTEN      4139/kube-controlle 
+tcp        0      0 127.0.0.1:10249         0.0.0.0:*               LISTEN      4439/kube-proxy     
+tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      4317/kubelet        
+tcp        0      0 192.168.122.87:2380     0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 192.168.122.87:2379     0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 127.0.0.1:44071         0.0.0.0:*               LISTEN      2328/containerd     
+tcp6       0      0 :::10250                :::*                    LISTEN      4317/kubelet        
+tcp6       0      0 :::10256                :::*                    LISTEN      4439/kube-proxy     
+tcp6       0      0 :::22                   :::*                    LISTEN      706/sshd: /usr/sbin 
+tcp6       0      0 :::6443                 :::*                    LISTEN      4169/kube-apiserver 
+```
+##### Documentation Link:
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
 * Note: Suppose if you receive the following error run the error fix step
 ``` bash
 error execution phase preflight: [preflight] Some fatal errors occurred:
@@ -83,22 +129,4 @@ sysctl -p /etc/sysctl.conf
 ```
 ``` bash
 sysctl --system
-```
-* Run the kubeadm init command 
-``` bash
-kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.2
-```
-* copy the kube config
-``` bash
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-```
-* install a network addon flannal on (master node)
-``` bash
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-```
-* List the manifest files
-``` bash
-ls -l /etc/kubernetes/manifests
 ```
