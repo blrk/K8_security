@@ -175,4 +175,9 @@ NAME         READY   STATUS    RESTARTS   AGE
 nginx-pod    1/1     Running   0          38m
 nginx-pod1   1/1     Running   0          37m
 ```
+* Delete the pods 
+``` bash
+kubectl delete nginx-pod nginx-pod1
+```
+
 
