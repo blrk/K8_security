@@ -45,7 +45,9 @@ kubectl get csr sam -o jsonpath='{.status.certificate}' | base64 --decode > sam.
 ```
 * Create user sam  
 ``` bash
-useradd -m sam -s /bin/bash```
+useradd -m sam -s /bin/bash
+
+```
 
 * Move the certificates to the home directory of the user "sam"
 ``` bash
