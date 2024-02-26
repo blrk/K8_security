@@ -233,15 +233,103 @@ yes
 kubectl auth can-i create deployments
 no
 ```
-#### Creating Cluster Role
-* Creating namespaces 
+* Try deleting the pod
 ``` bash
-
+kubectl delete pods pod-sam
+Error from server (Forbidden): pods "pod-sam" is forbidden: User "sam" cannot delete resource "pods" in API group "" in the namespace "default"
+```
+#### Creating Cluster Role
+* In terminal 1 login as root user and navigate into config
+``` bash
+cd config
+```
+* Create dev, prod namespaces
+``` bash
+kubectl create namespace dev
+namespace/dev created
+kubectl create namespace prod
+namespace/prod created
+```
+* Create cluster role
+``` bash
+vi clusterrole.yaml
+```
+``` bash
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list","create"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+```
+``` bash
+kubectl apply -f clusterrole.yaml 
+clusterrole.rbac.authorization.k8s.io/cluster-pod-reader created
+```
+* Create cluster role binding for user sam 
+``` bash
+vi clusterrolebinding.yaml
+```
+``` bash
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-pods-global
+subjects:
+- kind: User
+  name: sam
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+``` bash
+kubectl apply -f clusterrolebinding.yaml
+clusterrolebinding.rbac.authorization.k8s.io/read-pods-global created
+```
+* Verify the cluster role
+* In terminal 2 login as user sam
+``` bash
+kubectl run pod-sam-dev --image=nginx -n dev
+pod/pod-sam-dev created
+```
+``` bash
+kubectl exec -it -n dev pod-sam-dev -- bash
+```
+* Delete the cluster role
+``` bash
+kubectl delete -f clusterrolebinding.yaml
+clusterrolebinding.rbac.authorization.k8s.io "read-pods-global" deleted
+```
+* Role binding to cluster role
+``` bash
+vi rolebind-cluster.yaml
+```
+``` bash
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev-pods
+  namespace: dev
+subjects:
+- kind: User
+  name: sam
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+``` bash
+kubectl apply -f rolebind-cluster.yaml
+```
+``` bash
+kubectl exec -it -n dev pod-sam-dev -- bash
 ```
 
-
-
-* Cluster role and cluster role binding
-* Creating ingress controller and ingress resource
-* Ingress security
-* Create a service account and secure it
