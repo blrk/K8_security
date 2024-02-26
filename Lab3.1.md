@@ -8,7 +8,7 @@ root@kubeadm:~# cd /root/k8_certificates/
 * Create certificates for user sam
 ``` bash
 openssl genrsa -out sam.key 4098
-openssl req -new -key sam.key -subj "/CN=john/O=developers" -out sam.csr
+openssl req -new -key sam.key -subj "/CN=sam/O=developers" -out sam.csr
 ```
 * Create Certificate signing request
 * More info on certificate singing https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/
