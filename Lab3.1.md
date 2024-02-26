@@ -68,7 +68,7 @@ kubectl get pods --server=https://<ip_address>:6443 --client-certificate /home/s
 * Note: Replace the <ip_address> with the ip address of the ethernet interface
 * You will see the following error
 ``` bash
-Error from server (Forbidden): pods is forbidden: User "john" cannot list resource "pods" in API group "" in the namespace "default"
+Error from server (Forbidden): pods is forbidden: User "sam" cannot list resource "pods" in API group "" in the namespace "default"
 ```
 #### Create .kubeconfig file for the user
 * Store the server ip in an environment variable 
