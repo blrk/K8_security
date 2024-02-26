@@ -79,13 +79,13 @@ kubectl config set-cluster kubeadm \
     --certificate-authority=/home/sam/ca.crt \
     --embed-certs=true \
     --server=https://${SERVER_IP}:6443 \
-    --kubeconfig=john.kubeconfig
+    --kubeconfig=sam.kubeconfig
 
 kubectl config set-credentials sam \
     --client-certificate=sam.crt \
     --client-key=sam.key \
     --embed-certs=true \
-    --kubeconfig=john.kubeconfig
+    --kubeconfig=sam.kubeconfig
 
 kubectl config set-context default \
     --cluster=kubeadm \
@@ -109,6 +109,19 @@ cp sam.kubeconfig ~/.kube/config
 ``` bash
 kubectl get pods
 ```
+
+#### Navigating the K8s API groups
+* In Terminal 1 run the following command
+``` bash
+kubectl proxy --port 8085
+```
+* In terminal 2 list the APIs
+``` bash
+curl localhost:8085
+curl localhost:8085/api/v1
+```
+#### Creating and binding a role
+
 
 
 
