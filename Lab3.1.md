@@ -101,7 +101,7 @@ kubectl config use-context default --kubeconfig=sam.kubeconfig
 * List the pods
 ``` bash
 kubectl get pods --kubeconfig=sam.kubeconfig
-The connection to the server localhost:8080 was refused - did you specify the right host or port?
+Error from server (Forbidden): pods is forbidden: User "sam" cannot list resource "pods" in API group "" in the namespace "default"
 ```
 * Copy the kubeconfig file
 ``` bash
