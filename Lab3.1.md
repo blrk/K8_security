@@ -117,17 +117,127 @@ kubectl get pods
 ``` bash
 kubectl proxy --port 8085
 ```
+* Note: connect without any authtication
 * In terminal 2 list the APIs
 ``` bash
 curl localhost:8085
 curl localhost:8085/api/v1
 ```
 #### Creating and binding a role
+* Create a config directory and navigate into that 
+``` bash
+mkdir config && cd config/
+```
+* Create a file read-rbac.yaml
+``` bash
+vi read-rbac.yaml
+```
+``` bash
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-read-only
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list","create"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+```
+```  bash
+kubectl apply -f read-rbac.yaml 
+role.rbac.authorization.k8s.io/pod-read-only created
+```
+``` bash
+kubectl get role
+NAME            CREATED AT
+pod-read-only   2024-02-26T08:54:30Z
+```
+``` bash
+kubectl describe role pod-read-only
+Name:         pod-read-only
+Labels:       <none>
+Annotations:  <none>
+PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  pods/exec  []                 []              [create]
+  pods       []                 []              [get watch list create]
+```
+* Create a role binding 
+``` bash
+vi rolebinding.yaml
+```
+``` bash
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods
+  namespace: default
+subjects:
+- kind: User
+  name: sam
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-read-only
+  apiGroup: rbac.authorization.k8s.io
+```
+``` bash
+kubectl apply -f rolebinding.yaml
+rolebinding.rbac.authorization.k8s.io/read-pods created
+```
+``` bash
+kubectl get rolebinding
+NAME        ROLE                 AGE
+read-pods   Role/pod-read-only   31s
+```
+``` bash
+kubectl describe rolebinding read-pods
+Name:         read-pods
+Labels:       <none>
+Annotations:  <none>
+Role:
+  Kind:  Role
+  Name:  pod-read-only
+Subjects:
+  Kind  Name  Namespace
+  ----  ----  ---------
+  User  sam   
+```
+#### Login as user sam and verify
+``` bash
+su - john
+```
+* List the pods
+``` bash
+kubectl get pods
+No resources found in default namespace.
+```
+* Create a pod
+``` bash
+kubectl run pod-sam --image=nginx
+```
+* Login into the pod
+``` bash
+kubectl exec -it pod-sam -- bash
+```
+* Verify the API access
+``` bash
+kubectl auth can-i create pods
+yes
+```
+``` bash
+kubectl auth can-i create deployments
+no
+```
+#### Creating Cluster Role
+* Creating namespaces 
+``` bash
 
-
-
-
-
+```
 
 
 
