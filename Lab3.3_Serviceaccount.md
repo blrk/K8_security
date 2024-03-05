@@ -1,4 +1,4 @@
-* Create a service account and secure it
+### Create and manage service accounts (SA)
 #### Pod using Service account
 Note: Perform the following 
 * List all the existing service accouts
