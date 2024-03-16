@@ -130,3 +130,63 @@ sysctl -p /etc/sysctl.conf
 ``` bash
 sysctl --system
 ```
+### Install kubeadm cluster in Amazon Linux 2
+* In terminal 1 login as root user
+``` bash
+sudo su -
+```
+* Download the installation script file
+``` bash
+wget https://raw.githubusercontent.com/blrk/K8-Practitioner/main/day2/install.sh
+```
+* Set executable permission
+``` bash
+chmod +x install.sh 
+```
+* Execute the install.sh script to install kubeadm cluster
+``` bash
+./install.sh 
+```
+* Initialise the kubeadm cluster
+``` bash
+kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version=1.24.2
+```
+* copy the kubecofig file
+``` bash
+mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+```
+* Verify the k8s components status
+``` bash
+netstat -ntlp
+```
+``` bash
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      706/sshd: /usr/sbin 
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      641/systemd-resolve 
+tcp        0      0 127.0.0.1:2381          0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 127.0.0.1:2379          0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 127.0.0.1:10259         0.0.0.0:*               LISTEN      4211/kube-scheduler 
+tcp        0      0 127.0.0.1:10257         0.0.0.0:*               LISTEN      4139/kube-controlle 
+tcp        0      0 127.0.0.1:10249         0.0.0.0:*               LISTEN      4439/kube-proxy     
+tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      4317/kubelet        
+tcp        0      0 192.168.122.87:2380     0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 192.168.122.87:2379     0.0.0.0:*               LISTEN      4222/etcd           
+tcp        0      0 127.0.0.1:44071         0.0.0.0:*               LISTEN      2328/containerd     
+tcp6       0      0 :::10250                :::*                    LISTEN      4317/kubelet        
+tcp6       0      0 :::10256                :::*                    LISTEN      4439/kube-proxy     
+tcp6       0      0 :::22                   :::*                    LISTEN      706/sshd: /usr/sbin 
+tcp6       0      0 :::6443                 :::*                    LISTEN      4169/kube-apiserver 
+```
+
+* Install Calico network addon
+``` bash
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/custom-resources.yaml
+```
+##### Documentation Link:
+
+* https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
