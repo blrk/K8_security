@@ -31,15 +31,15 @@ kubectl get pods -o wide
 ```
 ``` bash
 NAME    READY   STATUS    RESTARTS   AGE    IP              NODE           NOMINATED NODE   READINESS GATES
-pod-1   1/1     Running   0          117m   10.244.63.136   amazon-linux   <none>           <none>
-pod-2   1/1     Running   0          117m   10.244.63.137   amazon-linux   <none>           <none>
+nw-pod-1   1/1     Running   0          117m   10.244.63.136   amazon-linux   <none>           <none>
+nw-pod-2   1/1     Running   0          117m   10.244.63.137   amazon-linux   <none>           <none>
 ```
 ``` bash
 kubectl get pods -o wide -n external
 ```
 ``` bash
 NAME    READY   STATUS    RESTARTS   AGE    IP              NODE           NOMINATED NODE   READINESS GATES
-pod-3   1/1     Running   0          117m   10.244.63.138   amazon-linux   <none>           <none>
+nw-pod-3   1/1     Running   0          117m   10.244.63.138   amazon-linux   <none>           <none>
 ```
 * List the network policies in the default namespace. No policy will be available
 ``` bash
@@ -51,4 +51,43 @@ kubectl exec -it nw-pod1 -- ping -c 3 <nw-pod2 IP>
 kubectl exec -it nw-pod1 -- ping -c 3 <nw-pod3 IP> 
 kubectl exec -it nw-pod1 -- ping -c 3 sc.com
 ```
+#### Examine Default deny ingress 
+* You can create a "default" ingress isolation policy for a namespace by creating a NetworkPolicy that selects all pods but does not allow any ingress traffic to those pods.
+* create a nw-policy directory and navigate into that 
+``` bash
+mkdir /root/nw-policy; cd /root/nw-policy
+```
+* create a file vi default.yml
+``` bash
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+```
+``` bash
+kubectl apply -f default.yml 
+```
+* List the network policy 
+``` bash
+kubectl get netpol
+```
+``` bash
+NAME                   POD-SELECTOR   AGE
+default-deny-ingress   <none>         114s
+```
+* Ping the nw-pod-2
+``` bash
+kubectl exec -it nw-pod-1 -- ping -c 3 10.244.63.137
+```
+* Try to ping nw-pod-3 
+``` bash
+kubectl exec -it nw-pod-1 -- ping -c 3 10.244.63.138
+kubectl exec -it nw-pod-1 -- ping -c 3 sc.com
 
+```
+* Note: The default deny ploicy applied default namespace. Pinging with pod in other namesapce is working and to the internet
