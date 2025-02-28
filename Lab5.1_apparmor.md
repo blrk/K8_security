@@ -169,5 +169,111 @@ sh: can't create file1.txt: Permission denied
 ``` bash
 exit
 ```
+#### Seccomp profiles
+``` bash
+cat <<EOF | tee /var/lib/kubelet/seccomp/profiles/ping-seccomp.json
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "architectures": [
+    "SCMP_ARCH_X86_64",
+    "SCMP_ARCH_X86",
+    "SCMP_ARCH_X32"
+  ],
+  "syscalls": [
+    {
+      "name": "socket",
+      "action": "SCMP_ACT_ERRNO",
+      "args": [
+        {
+          "index": 0,
+          "value": 2,
+          "op": "SCMP_CMP_EQ"
+        },
+        {
+          "index": 1,
+          "value": 1,
+          "op": "SCMP_CMP_EQ"
+        },
+        {
+          "index": 2,
+          "value": 0,
+          "op": "SCMP_CMP_EQ"
+        }
+      ]
+    }
+  ]
+}
+EOF
+```
+``` bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ping-blocked-pod
+spec:
+  containers:
+  - name: ping-blocked-container
+    image: praqma/network-multitool
+    securityContext:
+      seccompProfile:
+        type: "Local"
+        localhostProfile: "ping-seccomp.json"
+```
+``` bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ping-blocked-pod
+  labels:
+    app: ping-blocked-pod
+spec:
+  securityContext:
+    seccompProfile:
+      type: Localhost
+      localhostProfile: profiles/ping-seccomp.json
+  containers:
+  - name: ping-blocked-container
+    image: praqma/network-multitool    
+    securityContext:
+      allowPrivilegeEscalation: false
+```
+``` bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ping-blocked-pod
+  labels:
+    app: ping-blocked-pod
+spec:
+  securityContext:
+    seccompProfile:
+      type: Localhost
+      localhostProfile: profiles/pblock.json
+  containers:
+  - name: ping-blocked-container
+    image: hashicorp/http-echo:1.0
+    args:
+    - "-text=just made some syscalls!"
+    securityContext:
+      allowPrivilegeEscalation: false
+```
+====
+new test
 
+``` bash
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "architectures": [
+    "SCMP_ARCH_X86_64",
+    "SCMP_ARCH_X86",
+    "SCMP_ARCH_X32"
+  ],
+  "syscalls": [
+    {
+      "name": "NET_RAW",
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}
 
+```
