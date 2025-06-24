@@ -83,5 +83,38 @@ spec:
     port: 443
     targetPort: 443
 ```
-
+* Navigate back to your webhook directory (where ca.crt is located) and run:
+```bash
+cat ca.crt | base64 -w 0
+```
+* This command will output a single, long string of base64-encoded characters.
+* Copy this entire output string and Paste the copied output into your mutatingwebhookconfiguration.yaml file:
+* Replace the placeholder # PASTE THE BASE64-ENCODED CONTENT
+```bash
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: imagepolicy-mutating-webhook
+webhooks:
+  - name: imagepolicy-webhook-svc.default.svc
+    clientConfig:
+      service:
+        name: imagepolicy-webhook-svc
+        namespace: default
+        path: "/mutate" # This path should match the endpoint your webhook serves
+      caBundle: |            
+        <PASTE THE BASE64-ENCODED CONTENT>  
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: "default"
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    timeoutSeconds: 5
+```
+* 
 
